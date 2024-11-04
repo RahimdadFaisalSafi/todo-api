@@ -1,9 +1,20 @@
+from typing import List
 from fastapi import FastAPI
+from pydantic import BaseModel
+
+class TodoCreate (BaseModel):
+    id: int
+    title: str
+    status: bool = False
+    
+class Todo (BaseModel):
+    id: int
+    title: str
+    status: bool = False
 
 app = FastAPI()
 
-todo_1 = {"id":1, "title": "Mein erstes Todo", "status": "open"}
-todos = [todo_1]
+todos = []
 
 @app.get('/')
 def root():
@@ -12,8 +23,12 @@ def root():
 def get_todos(): 
     return todos
 
-@app.post("/todos")
-def post_todos(item):
-    print(item)
-    todos.append(item)
+@app.post("/todos", response_model=List[Todo])
+def post_todos(todo: TodoCreate):
+    new_todo = Todo(
+        id = todo.id,
+        title=todo.title,
+        status=todo.status
+    )
+    todos.append(new_todo)
     return todos
